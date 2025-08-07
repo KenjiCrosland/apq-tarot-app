@@ -244,9 +244,7 @@ const statistics = computed(() => {
   let cur: 'rev' | 'up' | null = null,
     len = 0;
   for (const c of all) {
-    const t: c['reversed'] extends true ? 'rev' : 'up' = c.reversed
-      ? 'rev'
-      : 'up';
+    const t: 'rev' | 'up' = c.reversed ? 'rev' : 'up';
     if (t === cur) len++;
     else {
       if (len >= 3 && cur) runs.push({ type: cur, len });
