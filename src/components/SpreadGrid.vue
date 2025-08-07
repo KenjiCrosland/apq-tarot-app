@@ -27,19 +27,20 @@ interface SpreadSpec {
 }
 
 interface TarotCardType {
-  // Define the properties of a Tarot card here as needed
+  name: string
+  // Add other properties of a Tarot card as needed
   [key: string]: any
 }
 
-const props = defineProps < {
+const props = defineProps<{
   spreadSpec: SpreadSpec
-  cards: Record < string, TarotCardType>
-  bp ?: string
-}> ()
+  cards: Record<string, TarotCardType>
+  bp?: string
+}>()
 
-const emit = defineEmits < {
+const emit = defineEmits<{
   (e: 'flipped', card: TarotCardType, pos: SpreadPosition): void
-}> ()
+}>()
 
 const gridStyle = computed(() => {
   const bp = props.spreadSpec.templates[props.bp ?? 'lg'] ? props.bp ?? 'lg' : 'lg'

@@ -1,0 +1,10 @@
+// tsconfig.json  (root of the repo)
+{
+  "compilerOptions": {
+    /* existing options … */
+    "baseUrl": ".",          // <-- required for "paths" to work
+    "paths": {
+      "@/*": ["src/*"]       // <-- VS Code now understands '@/foo'
+    }
+  },
+}

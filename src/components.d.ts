@@ -8,7 +8,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     MainView: typeof import('./components/MainView.vue')['default']
     SpreadGrid: typeof import('./components/SpreadGrid.vue')['default']
     TarotCard: typeof import('./components/TarotCard.vue')['default']
