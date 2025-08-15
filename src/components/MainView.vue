@@ -4,66 +4,66 @@
     <AppSidebar :show-debug="showDebug" :current-spread-name="currentSpreadSpec.name" @shuffle="shuffleDeck"
       @reset="resetDeck" @deal-spread="dealSpread" @toggle-debug="showDebug = !showDebug" />
 
-    <!-- Main Content -->
-    <main class="main-pane">
-      <!-- Question Input -->
-      <section class="question-section">
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Bar with Question Input -->
+      <header class="top-bar">
         <n-input v-model:value="question" placeholder="Ask a question to guide your reading..." size="large" clearable
           class="question-input" />
-      </section>
+      </header>
 
-      <!-- Spread Display -->
-      <section class="spread-section">
-        <SpreadGrid :spread-spec="currentSpreadSpec" :cards="spreadCards" :bp="breakpoint"
-          :current-position-index="currentPositionIndex" :show-descriptions="true" />
-      </section>
+      <!-- Two Column Layout -->
+      <div class="content-grid">
+        <!-- Left Column: Spread & Controls -->
+        <div class="spread-column">
+          <!-- Spread Display -->
+          <div class="spread-container">
+            <SpreadGrid :spread-spec="currentSpreadSpec" :cards="spreadCards" :bp="breakpoint"
+              :current-position-index="currentPositionIndex" :show-descriptions="true" />
+          </div>
 
-      <!-- Controls -->
-      <section v-if="hasActiveSpread" class="controls-section">
-        <Transition name="fade" mode="out-in">
-          <n-button v-if="canRevealNext" type="primary" size="large" @click="revealNextCard" :loading="isLoadingAI"
-            class="reveal-button">
-            <template #icon>✨</template>
-            Reveal {{ nextPositionLabel }}
-          </n-button>
+          <!-- Control Buttons -->
+          <div v-if="hasActiveSpread" class="controls-container">
+            <Transition name="fade" mode="out-in">
+              <n-button v-if="canRevealNext" type="primary" size="large" @click="revealNextCard" :loading="isLoadingAI"
+                class="reveal-button">
+                <template #icon>✨</template>
+                Reveal {{ nextPositionLabel }}
+              </n-button>
 
-          <n-button v-else type="default" size="large" @click="() => dealSpread(currentSpreadSpec)"
-            class="new-spread-button">
-            Deal New {{ currentSpreadSpec.name }}
-          </n-button>
-        </Transition>
-      </section>
+              <div v-else class="completion-actions">
+                <n-button type="default" size="large" @click="() => dealSpread(currentSpreadSpec)"
+                  class="new-spread-button">
+                  New {{ currentSpreadSpec.name }}
+                </n-button>
+              </div>
+            </Transition>
 
-      <!-- Question Display -->
-      <section v-if="question" class="question-display">
-        <h2 class="question-header">{{ question }}</h2>
-      </section>
+            <!-- Position Info -->
+            <div v-if="showPositionInfo" class="position-hint">
+              <p>{{ currentPosition.description || defaultPositionDescription }}</p>
+            </div>
+          </div>
+        </div>
 
-      <!-- Current Position Info -->
-      <section v-if="showPositionInfo" class="position-info">
-        <n-card size="small" embedded>
-          <template #header>
-            Current Position: {{ currentPosition.label }}
-          </template>
-          <p>{{ currentPosition.description || defaultPositionDescription }}</p>
-        </n-card>
-      </section>
+        <!-- Right Column: Interpretation -->
+        <div class="interpretation-column">
+          <InterpretationDisplay :interpretation="interpretationText" :is-loading="isLoadingAI" :error="aiError"
+            :retry-attempt="retryAttempt" :current-card-name="currentCardName" :question="question"
+            :revealed-cards="revealedCards" @clear="handleClearReading" />
+        </div>
+      </div>
 
-      <!-- Interpretation Display -->
-      <InterpretationDisplay :interpretation="interpretationText" :is-loading="isLoadingAI" :error="aiError"
-        :retry-attempt="retryAttempt" :current-card-name="currentCardName" :question="question"
-        :revealed-cards="revealedCards" @clear="clearInterpretation" />
-
-      <!-- Debug Panel -->
-      <DebugPanel :show="showDebug" :deck-string="deckString" :statistics="statistics" :additional-info="debugInfo" />
+      <!-- Debug Panel (Full Width) -->
+      <DebugPanel v-if="showDebug" :show="showDebug" :deck-string="deckString" :statistics="statistics"
+        :additional-info="debugInfo" />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, computed, onMounted, onBeforeUnmount } from 'vue'
-import { NButton, NInput, NCard } from 'naive-ui'
-import { debounce } from 'lodash-es'
+import { ref, shallowRef, computed, onMounted } from 'vue'
+import { NButton, NInput } from 'naive-ui'
 
 // Components
 import AppSidebar from '@/components/AppSidebar.vue'
@@ -78,7 +78,7 @@ import { useTarotDeck } from '@/composables/useTarotDeck'
 import { useCumulativeInterpretation } from '@/composables/useCumulativeInterpretation'
 
 // Types
-import type { SpreadSpec, SpreadPosition, Card, Interpretation } from '@/types'
+import type { SpreadSpec, Card } from '@/types'
 
 /* ── Composables ─────────────────────────────────────────────── */
 const { breakpoint } = useBreakpoint()
@@ -129,15 +129,8 @@ const nextPositionLabel = computed(() =>
   currentPosition.value?.label || 'Next Card'
 )
 
-const previousPositionLabel = computed(() => {
-  const prevIndex = currentPositionIndex.value - 1
-  return prevIndex >= 0
-    ? currentSpreadSpec.value.positions[prevIndex]?.label
-    : null
-})
-
 const showPositionInfo = computed(() =>
-  canRevealNext.value && hasActiveSpread.value && !hasInterpretation.value
+  canRevealNext.value && hasActiveSpread.value && !isLoadingAI
 )
 
 const defaultPositionDescription = 'Click the button above to reveal this card and receive its interpretation.'
@@ -184,6 +177,14 @@ async function revealNextCard() {
   currentPositionIndex.value++
 }
 
+function handleClearReading() {
+  clearInterpretation()
+  // Optionally reset the spread too
+  if (confirm('Clear the interpretation and deal a new spread?')) {
+    dealSpread(currentSpreadSpec.value)
+  }
+}
+
 /* ── Lifecycle ───────────────────────────────────────────────── */
 onMounted(() => {
   initDeck()
@@ -195,52 +196,84 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
-  background: linear-gradient(to bottom, #ffffff, #fafafa);
+  background: #fafbfc;
 }
 
-.main-pane {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-/* Sections */
-.question-section {
-  margin-bottom: 2rem;
+.main-content {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Top Bar */
+.top-bar {
+  padding: 1.5rem;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .question-input {
-  max-width: 600px;
+  max-width: 700px;
+  margin: 0 auto;
   width: 100%;
-  --n-height: 56px;
-  --n-font-size: 16px;
+  --n-height: 48px;
+  --n-font-size: 15px;
   --n-padding-left: 1.25rem;
   --n-padding-right: 1.25rem;
-  --n-border-radius: 12px;
+  --n-border-radius: 24px;
 }
 
-.spread-section {
-  margin-bottom: 2rem;
-  min-height: 400px;
+/* Two Column Grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  height: calc(100vh - 100px);
+  overflow: hidden;
+}
+
+/* Spread Column */
+.spread-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+  min-height: 0;
+  /* Important for flexbox children */
+}
+
+.spread-container {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  min-height: 0;
+  /* Important for flexbox children */
+  position: relative;
 }
 
-.controls-section {
+.controls-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
-  min-height: 60px;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .reveal-button,
 .new-spread-button {
-  min-width: 200px;
+  min-width: 220px;
   --n-height: 48px;
   --n-font-size: 16px;
   --n-border-radius: 24px;
@@ -250,25 +283,39 @@ onMounted(() => {
 
 .reveal-button:not(:disabled):hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.3);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
 }
 
-.question-display {
+.completion-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.position-hint {
   text-align: center;
-  margin-bottom: 2rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  max-width: 400px;
 }
 
-.question-header {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
-  line-height: 1.4;
+/* Interpretation Column */
+.interpretation-column {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.position-info {
-  max-width: 600px;
-  margin: 0 auto 2rem;
+.interpretation-column :deep(.interpretation-container) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.interpretation-column :deep(.interpretation-body) {
+  flex: 1;
+  max-height: none;
 }
 
 /* Transitions */
@@ -282,45 +329,89 @@ onMounted(() => {
   opacity: 0;
 }
 
-/* Responsive Design */
+/* Tablet - Stack layout */
 @media (max-width: 1024px) {
   .app-root {
     grid-template-columns: 200px 1fr;
   }
 
-  .main-pane {
+  .content-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 1.5rem;
     padding: 1.5rem;
+    height: auto;
+    overflow: auto;
+  }
+
+  .spread-column {
+    height: auto;
+  }
+
+  .spread-container {
+    min-height: 400px;
+  }
+
+  .interpretation-column {
+    height: auto;
+  }
+
+  .interpretation-column :deep(.interpretation-body) {
+    max-height: 500px;
   }
 }
 
+/* Mobile - Full stack */
 @media (max-width: 768px) {
   .app-root {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
   }
 
-  .main-pane {
+  .main-content {
+    height: auto;
+  }
+
+  .top-bar {
     padding: 1rem;
   }
 
-  .question-header {
-    font-size: 1.5rem;
+  .content-grid {
+    padding: 1rem;
+    gap: 1rem;
   }
 
-  .spread-section {
-    min-height: 300px;
+  .spread-container {
+    min-height: 350px;
+    padding: 1rem;
+  }
+
+  .controls-container {
+    padding: 1rem;
+  }
+
+  .reveal-button,
+  .new-spread-button {
+    min-width: 180px;
+    --n-height: 44px;
+    --n-font-size: 15px;
+  }
+
+  .interpretation-column :deep(.interpretation-body) {
+    max-height: 400px;
   }
 }
 
+/* Small Mobile */
 @media (max-width: 480px) {
-  .question-header {
-    font-size: 1.25rem;
+  .spread-container {
+    min-height: 300px;
   }
 
   .reveal-button,
   .new-spread-button {
     min-width: 160px;
-    --n-height: 44px;
+    --n-height: 40px;
     --n-font-size: 14px;
   }
 }

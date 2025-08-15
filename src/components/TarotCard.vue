@@ -1,37 +1,29 @@
 <template>
-  <div class="tarot-card" :class="{
-    'interactive': interactive,
-    'glowing': showGlow,
-    'face-up': card.faceUp,
-    'reversed': card.reversed && card.faceUp
-  }" @click="interactive && flip()" @keydown.enter="interactive && flip()"
-    @keydown.space.prevent="interactive && flip()" role="button" :aria-pressed="card.faceUp"
-    :aria-label="`${card.name}${card.reversed ? ' reversed' : ''}, ${card.faceUp ? 'face up' : 'face down'}`"
-    :tabindex="interactive ? 0 : -1">
-    <div :class="['card-inner', { flipped: !card.faceUp }]">
+  <div class="tarot-card" :style="cardStyle" @click="flip" @keydown.enter="flip" @keydown.space.prevent="flip"
+    role="button" :aria-pressed="localFaceUp"
+    :aria-label="`${card.name}${card.reversed ? ' reversed' : ''}, click to ${localFaceUp ? 'hide' : 'reveal'}`"
+    tabindex="0">
+    <div :class="['card-inner', { flipped: !localFaceUp }]">
       <!-- FRONT -->
-      <div class="card-face front" :style="card.faceUp && card.reversed ? 'transform: rotate(180deg);' : ''">
+      <div class="card-face front" :style="localFaceUp && card.reversed ? 'transform: rotate(180deg);' : ''">
         <div class="card-content">
-          <span class="card-name">{{ card.name }}</span>
-          <span v-if="card.reversed" class="reversed-indicator">↻</span>
+          <span class="card-name" :style="textStyle">{{ card.name }}</span>
+          <span v-if="card.reversed" class="reversed-indicator" :style="iconStyle">↻</span>
         </div>
       </div>
 
       <!-- BACK -->
       <div class="card-face back">
         <div class="card-back-design">
-          <span class="back-text">✦</span>
+          <span class="back-text" :style="backTextStyle">✦</span>
         </div>
       </div>
     </div>
-
-    <!-- Glow effect overlay -->
-    <div v-if="showGlow" class="glow-overlay"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, ref, watch, computed } from 'vue'
 
 interface TarotCard {
   name: string
@@ -40,22 +32,63 @@ interface TarotCard {
   [key: string]: any
 }
 
-const props = withDefaults(defineProps<{
+interface CardStateChange {
   card: TarotCard
-  interactive?: boolean
-  showGlow?: boolean
-}>(), {
-  interactive: true,
-  showGlow: false
-})
+  field: string
+  value: any
+}
+
+const props = defineProps<{
+  card: TarotCard
+  scale?: number
+}>()
 
 const emit = defineEmits<{
   (e: 'flipped', card: TarotCard): void
+  (e: 'card-state-change', change: CardStateChange): void
 }>()
 
+// Use local state to avoid directly mutating props
+const localFaceUp = ref(props.card.faceUp || false)
+const cardScale = computed(() => props.scale || 1)
+
+// Watch for external changes to card.faceUp
+watch(() => props.card.faceUp, (newVal) => {
+  localFaceUp.value = newVal || false
+})
+
+// Computed styles for scaling
+const cardStyle = computed(() => ({
+  width: `${90 * cardScale.value}px`,
+  height: `${140 * cardScale.value}px`,
+}))
+
+const textStyle = computed(() => ({
+  fontSize: `${0.75 * cardScale.value}rem`,
+}))
+
+const iconStyle = computed(() => ({
+  fontSize: `${1 * cardScale.value}rem`,
+}))
+
+const backTextStyle = computed(() => ({
+  fontSize: `${2 * cardScale.value}rem`,
+}))
+
 function flip() {
-  if (!props.interactive) return
-  emit('flipped', props.card)
+  localFaceUp.value = !localFaceUp.value
+
+  // Emit state change event for parent to handle
+  emit('card-state-change', {
+    card: props.card,
+    field: 'faceUp',
+    value: localFaceUp.value
+  })
+
+  // Emit flipped event if card is now face up
+  if (localFaceUp.value) {
+    emit('flipped', props.card)
+  }
 }
 </script>
 
@@ -69,72 +102,28 @@ function flip() {
   --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
   --focus-ring: 2px solid #4a9eff;
-  --glow-color: #4a9eff;
 }
 
 .tarot-card {
-  width: 90px;
-  height: 140px;
   perspective: 1000px;
+  cursor: pointer;
   user-select: none;
   position: relative;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
-.tarot-card.interactive {
-  cursor: pointer;
-}
-
-.tarot-card.interactive:hover {
+.tarot-card:hover {
   transform: translateY(-2px);
 }
 
-.tarot-card.interactive:focus {
+.tarot-card:focus {
   outline: var(--focus-ring);
   outline-offset: 2px;
   border-radius: 12px;
 }
 
-.tarot-card.interactive:focus:not(:focus-visible) {
+.tarot-card:focus:not(:focus-visible) {
   outline: none;
-}
-
-.tarot-card.glowing {
-  animation: glow-pulse 2s ease-in-out infinite;
-}
-
-@keyframes glow-pulse {
-
-  0%,
-  100% {
-    filter: drop-shadow(0 0 8px rgba(74, 158, 255, 0.5));
-  }
-
-  50% {
-    filter: drop-shadow(0 0 20px rgba(74, 158, 255, 0.8));
-  }
-}
-
-.glow-overlay {
-  position: absolute;
-  inset: -8px;
-  border-radius: 16px;
-  background: radial-gradient(ellipse at center,
-      rgba(74, 158, 255, 0.3) 0%,
-      rgba(74, 158, 255, 0.1) 40%,
-      transparent 70%);
-  pointer-events: none;
-  animation: glow-rotate 3s linear infinite;
-}
-
-@keyframes glow-rotate {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .card-inner {
@@ -175,11 +164,11 @@ function flip() {
   color: var(--card-back-text);
 }
 
-.tarot-card.interactive:hover .card-face {
+.tarot-card:hover .card-face {
   box-shadow: var(--card-hover-shadow);
 }
 
-.tarot-card.face-up .card-face.front {
+.card-face.front:hover {
   background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
 }
 
@@ -228,5 +217,62 @@ function flip() {
   font-size: 2rem;
   opacity: 0.6;
   animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .tarot-card {
+    width: 75px;
+    height: 115px;
+  }
+
+  .card-name {
+    font-size: 0.65rem;
+  }
+
+  .reversed-indicator {
+    font-size: 0.875rem;
+  }
+
+  .back-text {
+    font-size: 1.5rem;
+  }
+
+  .card-face {
+    padding: 6px;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .card-inner {
+    transition: transform 0.3s ease;
+  }
+
+  .reversed-indicator {
+    animation: none;
+  }
+
+  .back-text {
+    animation: none;
+  }
+
+  .tarot-card:hover {
+    transform: none;
+  }
 }
 </style>

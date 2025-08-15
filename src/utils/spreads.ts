@@ -130,10 +130,12 @@ export const spreads: Record<string, SpreadSpec> = {
         ". . . . . . outcome"
       `,
       md: `
-        ". crown . self"
-        "past sig cross env"
-        ". root . hopes"
-        ". future . outcome"
+        ". crown ."
+        "past sig future"
+        ". cross ."
+        ". root ."
+        "self env hopes"
+        ". outcome ."
       `,
       sm: `
         "sig"
@@ -150,12 +152,12 @@ export const spreads: Record<string, SpreadSpec> = {
     },
     columns: {
       lg: '90px 90px 90px 90px 40px 40px 90px',
-      md: '90px 90px 90px 90px',
-      sm: '100px',
+      md: '90px 90px 90px',
+      sm: '90px',
     },
     rows: {
-      lg: 'repeat(4, 140px)',
-      md: 'repeat(4, 140px)',
+      lg: '140px 140px 140px 140px',
+      md: '140px 140px 140px 140px 140px 140px',
       sm: 'repeat(10, 140px)',
     },
   },
@@ -203,9 +205,9 @@ export const spreads: Record<string, SpreadSpec> = {
         ". advice ."
       `,
       md: `
-        "challenge"
+        ". challenge ."
         "past situation future"
-        "advice"
+        ". advice ."
       `,
       sm: `
         "situation"
@@ -216,13 +218,13 @@ export const spreads: Record<string, SpreadSpec> = {
       `,
     },
     columns: {
-      lg: 'repeat(3, 120px)',
-      md: 'repeat(3, 100px)',
-      sm: '120px',
+      lg: '90px 90px 90px',
+      md: '90px 90px 90px',
+      sm: '90px',
     },
     rows: {
-      lg: 'repeat(3, 160px)',
-      md: 'repeat(3, 150px)',
+      lg: '140px 140px 140px',
+      md: '140px 140px 140px',
       sm: 'repeat(5, 140px)',
     },
   },
@@ -278,13 +280,13 @@ export const spreads: Record<string, SpreadSpec> = {
     templates: {
       lg: `
         "past . . . . . outcome"
-        "present . . . . . advice"
+        ". present . . . advice ."
         ". . hidden obstacle external . ."
       `,
       md: `
-        "past . outcome"
-        "present . advice"
-        "hidden obstacle external"
+        "past . . . . . outcome"
+        ". present . . . advice ."
+        ". . hidden obstacle external . ."
       `,
       sm: `
         "past"
@@ -297,13 +299,13 @@ export const spreads: Record<string, SpreadSpec> = {
       `,
     },
     columns: {
-      lg: '90px 90px 90px 90px 90px 90px 90px',
-      md: '100px 100px 100px',
-      sm: '100px',
+      lg: 'repeat(7, 90px)',
+      md: 'repeat(7, 90px)',
+      sm: '90px',
     },
     rows: {
-      lg: 'repeat(3, 140px)',
-      md: 'repeat(3, 140px)',
+      lg: '140px 140px 140px',
+      md: '140px 140px 140px',
       sm: 'repeat(7, 140px)',
     },
   },
@@ -400,13 +402,13 @@ export const spreads: Record<string, SpreadSpec> = {
       `,
     },
     columns: {
-      lg: 'repeat(4, 100px)',
-      md: 'repeat(3, 100px)',
-      sm: '100px',
+      lg: 'repeat(4, 90px)',
+      md: 'repeat(3, 90px)',
+      sm: '90px',
     },
     rows: {
-      lg: 'repeat(3, 150px)',
-      md: 'repeat(3, 145px)',
+      lg: 'repeat(3, 140px)',
+      md: 'repeat(3, 140px)',
       sm: 'repeat(6, 140px)',
     },
   },

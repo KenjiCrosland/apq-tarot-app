@@ -166,9 +166,11 @@ async function copyToClipboard() {
 .interpretation-container {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  margin-bottom: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   transition: all 0.3s ease;
 }
 
@@ -244,7 +246,7 @@ async function copyToClipboard() {
 }
 
 .interpretation-body {
-  max-height: 600px;
+  flex: 1;
   overflow-y: auto;
   padding: 1.5rem;
 }
@@ -362,10 +364,21 @@ async function copyToClipboard() {
 }
 
 /* Mobile adjustments */
+@media (max-width: 1024px) {
+  .interpretation-container {
+    height: auto;
+    max-height: 600px;
+  }
+
+  .interpretation-body {
+    max-height: 400px;
+  }
+}
+
 @media (max-width: 768px) {
   .interpretation-container {
     border-radius: 8px;
-    margin-bottom: 1.5rem;
+    max-height: 500px;
   }
 
   .interpretation-header {
@@ -377,7 +390,7 @@ async function copyToClipboard() {
   }
 
   .interpretation-body {
-    max-height: 400px;
+    max-height: 350px;
     padding: 1rem;
   }
 
