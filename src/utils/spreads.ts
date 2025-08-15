@@ -42,17 +42,17 @@ export const spreads: Record<string, SpreadSpec> = {
     templates: {
       lg: '"past present future"',
       md: '"past present future"',
-      sm: '"past" "present" "future"',
+      sm: '"past present future"',
     },
     columns: {
-      lg: 'repeat(3, 120px)',
-      md: 'repeat(3, 100px)',
-      sm: '120px',
+      lg: 'repeat(3, minmax(80px, 120px))',
+      md: 'repeat(3, minmax(70px, 100px))',
+      sm: 'repeat(3, minmax(45px, 60px))',
     },
     rows: {
-      lg: '180px',
-      md: '160px',
-      sm: 'repeat(3, 160px)',
+      lg: 'minmax(120px, 180px)',
+      md: 'minmax(100px, 150px)',
+      sm: 'minmax(70px, 95px)',
     },
   },
 
@@ -130,39 +130,30 @@ export const spreads: Record<string, SpreadSpec> = {
         ". . . . . . outcome"
       `,
       md: `
-        ". crown ."
-        "past sig future"
-        ". cross ."
-        ". root ."
-        "self env hopes"
-        ". outcome ."
+        ". . crown . . self"
+        "past sig cross future . env"
+        ". . root . . hopes"
+        ". . . . . outcome"
       `,
       sm: `
-        "sig"
-        "cross"
-        "crown"
-        "root"
-        "past"
-        "future"
-        "self"
-        "env"
-        "hopes"
-        "outcome"
+        ". crown . self"
+        "past sig future env"
+        ". cross . hopes"
+        ". root . outcome"
       `,
     },
     columns: {
-      lg: '90px 90px 90px 90px 40px 40px 90px',
-      md: '90px 90px 90px',
-      sm: '90px',
+      lg: 'minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px) 40px 40px minmax(80px, 100px)',
+      md: 'minmax(70px, 90px) minmax(70px, 90px) minmax(70px, 90px) minmax(70px, 90px) 30px minmax(70px, 90px)',
+      sm: 'repeat(4, minmax(40px, 55px))',
     },
     rows: {
-      lg: '140px 140px 140px 140px',
-      md: '140px 140px 140px 140px 140px 140px',
-      sm: 'repeat(10, 140px)',
+      lg: 'repeat(4, minmax(120px, 160px))',
+      md: 'repeat(4, minmax(100px, 140px))',
+      sm: 'repeat(4, minmax(65px, 85px))',
     },
   },
 
-  // Additional spread: Five-Card spread
   fiveCard: {
     name: 'Five-Card',
     description: 'Explore a situation with context and advice',
@@ -210,26 +201,23 @@ export const spreads: Record<string, SpreadSpec> = {
         ". advice ."
       `,
       sm: `
-        "situation"
-        "challenge"
-        "past"
-        "future"
-        "advice"
+        ". challenge ."
+        "past situation future"
+        ". advice ."
       `,
     },
     columns: {
-      lg: '90px 90px 90px',
-      md: '90px 90px 90px',
-      sm: '90px',
+      lg: 'repeat(3, minmax(80px, 120px))',
+      md: 'repeat(3, minmax(70px, 100px))',
+      sm: 'repeat(3, minmax(45px, 60px))',
     },
     rows: {
-      lg: '140px 140px 140px',
-      md: '140px 140px 140px',
-      sm: 'repeat(5, 140px)',
+      lg: 'repeat(3, minmax(120px, 180px))',
+      md: 'repeat(3, minmax(100px, 150px))',
+      sm: 'repeat(3, minmax(70px, 95px))',
     },
   },
 
-  // Horseshoe spread
   horseshoe: {
     name: 'Horseshoe',
     description: 'Seven cards exploring the path from past to future',
@@ -284,33 +272,28 @@ export const spreads: Record<string, SpreadSpec> = {
         ". . hidden obstacle external . ."
       `,
       md: `
-        "past . . . . . outcome"
-        ". present . . . advice ."
-        ". . hidden obstacle external . ."
+        "past . . . outcome"
+        ". present . advice ."
+        ". hidden obstacle external ."
       `,
       sm: `
-        "past"
-        "present"
-        "hidden"
-        "obstacle"
-        "external"
-        "advice"
-        "outcome"
+        "past . . outcome"
+        ". present advice ."
+        "hidden obstacle external ."
       `,
     },
     columns: {
-      lg: 'repeat(7, 90px)',
-      md: 'repeat(7, 90px)',
-      sm: '90px',
+      lg: 'repeat(7, minmax(70px, 100px))',
+      md: 'repeat(5, minmax(60px, 85px))',
+      sm: 'repeat(4, minmax(40px, 55px))',
     },
     rows: {
-      lg: '140px 140px 140px',
-      md: '140px 140px 140px',
-      sm: 'repeat(7, 140px)',
+      lg: 'repeat(3, minmax(110px, 160px))',
+      md: 'repeat(3, minmax(95px, 135px))',
+      sm: 'repeat(3, minmax(65px, 90px))',
     },
   },
 
-  // Single card draw
   singleCard: {
     name: 'Single Card',
     description: 'Draw one card for daily guidance or simple questions',
@@ -328,18 +311,17 @@ export const spreads: Record<string, SpreadSpec> = {
       sm: '"card"',
     },
     columns: {
-      lg: '150px',
-      md: '130px',
-      sm: '120px',
+      lg: 'minmax(100px, 150px)',
+      md: 'minmax(85px, 120px)',
+      sm: 'minmax(60px, 80px)',
     },
     rows: {
-      lg: '220px',
-      md: '200px',
-      sm: '180px',
+      lg: 'minmax(160px, 240px)',
+      md: 'minmax(135px, 190px)',
+      sm: 'minmax(95px, 130px)',
     },
   },
 
-  // Relationship spread
   relationship: {
     name: 'Relationship',
     description: 'Explore dynamics between two people',
@@ -393,23 +375,20 @@ export const spreads: Record<string, SpreadSpec> = {
         ". challenge outcome"
       `,
       sm: `
-        "you"
-        "other"
-        "youfeel"
-        "theyfeel"
-        "challenge"
-        "outcome"
+        "you . other"
+        "youfeel . theyfeel"
+        "challenge outcome ."
       `,
     },
     columns: {
-      lg: 'repeat(4, 90px)',
-      md: 'repeat(3, 90px)',
-      sm: '90px',
+      lg: 'repeat(4, minmax(80px, 120px))',
+      md: 'repeat(3, minmax(70px, 100px))',
+      sm: 'repeat(3, minmax(45px, 60px))',
     },
     rows: {
-      lg: 'repeat(3, 140px)',
-      md: 'repeat(3, 140px)',
-      sm: 'repeat(6, 140px)',
+      lg: 'repeat(3, minmax(120px, 180px))',
+      md: 'repeat(3, minmax(100px, 150px))',
+      sm: 'repeat(3, minmax(70px, 95px))',
     },
   },
 };

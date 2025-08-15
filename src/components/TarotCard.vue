@@ -1,21 +1,21 @@
 <template>
-  <div class="tarot-card" :style="cardStyle" @click="flip" @keydown.enter="flip" @keydown.space.prevent="flip"
-    role="button" :aria-pressed="localFaceUp"
+  <div class="tarot-card" @click="flip" @keydown.enter="flip" @keydown.space.prevent="flip" role="button"
+    :aria-pressed="localFaceUp"
     :aria-label="`${card.name}${card.reversed ? ' reversed' : ''}, click to ${localFaceUp ? 'hide' : 'reveal'}`"
     tabindex="0">
     <div :class="['card-inner', { flipped: !localFaceUp }]">
       <!-- FRONT -->
       <div class="card-face front" :style="localFaceUp && card.reversed ? 'transform: rotate(180deg);' : ''">
         <div class="card-content">
-          <span class="card-name" :style="textStyle">{{ card.name }}</span>
-          <span v-if="card.reversed" class="reversed-indicator" :style="iconStyle">↻</span>
+          <span class="card-name">{{ card.name }}</span>
+          <span v-if="card.reversed" class="reversed-indicator">↻</span>
         </div>
       </div>
 
       <!-- BACK -->
       <div class="card-face back">
         <div class="card-back-design">
-          <span class="back-text" :style="backTextStyle">✦</span>
+          <span class="back-text">✦</span>
         </div>
       </div>
     </div>
@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch, computed } from 'vue'
+import { defineProps, defineEmits, ref, watch } from 'vue'
 
 interface TarotCard {
   name: string
@@ -40,7 +40,6 @@ interface CardStateChange {
 
 const props = defineProps<{
   card: TarotCard
-  scale?: number
 }>()
 
 const emit = defineEmits<{
@@ -50,30 +49,11 @@ const emit = defineEmits<{
 
 // Use local state to avoid directly mutating props
 const localFaceUp = ref(props.card.faceUp || false)
-const cardScale = computed(() => props.scale || 1)
 
 // Watch for external changes to card.faceUp
 watch(() => props.card.faceUp, (newVal) => {
   localFaceUp.value = newVal || false
 })
-
-// Computed styles for scaling
-const cardStyle = computed(() => ({
-  width: `${90 * cardScale.value}px`,
-  height: `${140 * cardScale.value}px`,
-}))
-
-const textStyle = computed(() => ({
-  fontSize: `${0.75 * cardScale.value}rem`,
-}))
-
-const iconStyle = computed(() => ({
-  fontSize: `${1 * cardScale.value}rem`,
-}))
-
-const backTextStyle = computed(() => ({
-  fontSize: `${2 * cardScale.value}rem`,
-}))
 
 function flip() {
   localFaceUp.value = !localFaceUp.value
@@ -94,6 +74,8 @@ function flip() {
 
 <style scoped>
 :root {
+  --card-aspect-ratio: 0.625;
+  /* Width/Height ratio (5:8) for tarot cards */
   --card-border: #999;
   --card-front-bg: #f2f2f2;
   --card-front-text: #333;
@@ -105,11 +87,13 @@ function flip() {
 }
 
 .tarot-card {
+  width: 100%;
+  height: 100%;
   perspective: 1000px;
   cursor: pointer;
   user-select: none;
   position: relative;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease;
 }
 
 .tarot-card:hover {
@@ -119,7 +103,7 @@ function flip() {
 .tarot-card:focus {
   outline: var(--focus-ring);
   outline-offset: 2px;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .tarot-card:focus:not(:focus-visible) {
@@ -145,9 +129,9 @@ function flip() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--card-border);
-  border-radius: 12px;
-  padding: 8px;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 8%;
   font-weight: 600;
   box-shadow: var(--card-shadow);
   transition: box-shadow 0.2s ease, background-color 0.2s ease;
@@ -168,28 +152,31 @@ function flip() {
   box-shadow: var(--card-hover-shadow);
 }
 
-.card-face.front:hover {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-}
-
 .card-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.25rem;
+  gap: 0.25em;
   width: 100%;
+  height: 100%;
+  justify-content: center;
 }
 
 .card-name {
-  font-size: 0.75rem;
+  font-size: clamp(0.5rem, 2vw, 0.875rem);
   line-height: 1.2;
   word-wrap: break-word;
   max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .reversed-indicator {
-  font-size: 1rem;
+  font-size: clamp(0.75rem, 3vw, 1.25rem);
   opacity: 0.7;
   animation: rotate 2s linear infinite;
 }
@@ -214,7 +201,7 @@ function flip() {
 }
 
 .back-text {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
   opacity: 0.6;
   animation: pulse 2s ease-in-out infinite;
 }
@@ -233,27 +220,24 @@ function flip() {
   }
 }
 
-/* Responsive adjustments */
+/* Small cards (mobile) - extra small text */
 @media (max-width: 600px) {
-  .tarot-card {
-    width: 75px;
-    height: 115px;
+  .card-face {
+    padding: 6%;
+    border-radius: 6px;
   }
 
   .card-name {
-    font-size: 0.65rem;
+    font-size: clamp(0.4rem, 1.5vw, 0.6rem);
+    -webkit-line-clamp: 2;
   }
 
   .reversed-indicator {
-    font-size: 0.875rem;
+    font-size: clamp(0.5rem, 2vw, 0.75rem);
   }
 
   .back-text {
-    font-size: 1.5rem;
-  }
-
-  .card-face {
-    padding: 6px;
+    font-size: clamp(1rem, 4vw, 1.5rem);
   }
 }
 
