@@ -49,9 +49,10 @@
         </n-card>
       </section>
 
-      <!-- Interpretations -->
-      <InterpretationPanel :interpretations="interpretations" :is-loading="isLoadingAI" :error="aiError"
-        :retry-attempt="retryAttempt" :current-position-label="previousPositionLabel" />
+      <!-- Interpretation Display -->
+      <InterpretationDisplay :interpretation="interpretationText" :is-loading="isLoadingAI" :error="aiError"
+        :retry-attempt="retryAttempt" :current-card-name="currentCardName" :question="question"
+        :revealed-cards="revealedCards" @clear="clearInterpretation" />
 
       <!-- Debug Panel -->
       <DebugPanel :show="showDebug" :deck-string="deckString" :statistics="statistics" :additional-info="debugInfo" />
@@ -67,14 +68,14 @@ import { debounce } from 'lodash-es'
 // Components
 import AppSidebar from '@/components/AppSidebar.vue'
 import SpreadGrid from '@/components/SpreadGrid.vue'
-import InterpretationPanel from '@/components/InterpretationPanel.vue'
+import InterpretationDisplay from '@/components/InterpretationDisplay.vue'
 import DebugPanel from '@/components/DebugPanel.vue'
 
 // Data & Utils
 import { spreads } from '@/utils/spreads'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { useTarotDeck } from '@/composables/useTarotDeck'
-import { useInterpretations } from '@/composables/useInterpretations'
+import { useCumulativeInterpretation } from '@/composables/useCumulativeInterpretation'
 
 // Types
 import type { SpreadSpec, SpreadPosition, Card, Interpretation } from '@/types'
@@ -94,13 +95,16 @@ const {
 } = useTarotDeck()
 
 const {
-  interpretations,
+  interpretationText,
+  revealedCards,
   isLoadingAI,
   aiError,
   retryAttempt,
-  generateInterpretation,
-  clearInterpretations,
-} = useInterpretations()
+  currentCardName,
+  hasInterpretation,
+  addCardInterpretation,
+  clearInterpretation,
+} = useCumulativeInterpretation()
 
 /* ── Core State ──────────────────────────────────────────────── */
 const question = ref('')
@@ -133,7 +137,7 @@ const previousPositionLabel = computed(() => {
 })
 
 const showPositionInfo = computed(() =>
-  canRevealNext.value && hasActiveSpread.value
+  canRevealNext.value && hasActiveSpread.value && !hasInterpretation.value
 )
 
 const defaultPositionDescription = 'Click the button above to reveal this card and receive its interpretation.'
@@ -147,7 +151,7 @@ const debugInfo = computed(() => ({
 
 /* ── Actions ─────────────────────────────────────────────────── */
 function dealSpread(spec: SpreadSpec) {
-  clearInterpretations()
+  clearInterpretation()
   aiError.value = null
   currentSpreadSpec.value = spec
   currentPositionIndex.value = 0
@@ -164,8 +168,8 @@ async function revealNextCard() {
   // Flip the card
   flipCard ? flipCard(card) : (card.faceUp = true)
 
-  // Generate interpretation
-  await generateInterpretation({
+  // Add to cumulative interpretation
+  await addCardInterpretation({
     card,
     position: pos,
     question: question.value,
