@@ -6,11 +6,6 @@
         'revealed': cards[pos.id]?.faceUp,
         'unrevealed': !cards[pos.id]?.faceUp && index < currentPositionIndex
       }">
-        <!-- Position label (always visible) -->
-        <div class="position-label">
-          <span class="position-number">{{ index + 1 }}</span>
-          <span class="position-name">{{ pos.label }}</span>
-        </div>
 
         <!-- Card or placeholder -->
         <div class="card-container">
@@ -19,11 +14,6 @@
           <div v-else class="placeholder">
             <span class="placeholder-hint">Empty</span>
           </div>
-        </div>
-
-        <!-- Position description (if showing descriptions) -->
-        <div v-if="showDescriptions && pos.description" class="position-description">
-          {{ pos.description }}
         </div>
       </div>
     </template>
@@ -92,7 +82,7 @@ const gridStyle = computed(() => {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: .5rem;
 }
 
 .spread-cell {

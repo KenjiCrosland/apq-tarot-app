@@ -8,6 +8,9 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AppSidebar: typeof import('./components/AppSidebar.vue')['default']
+    DebugPanel: typeof import('./components/DebugPanel.vue')['default']
+    InterpretationPanel: typeof import('./components/InterpretationPanel.vue')['default']
     MainView: typeof import('./components/MainView.vue')['default']
     SpreadGrid: typeof import('./components/SpreadGrid.vue')['default']
     TarotCard: typeof import('./components/TarotCard.vue')['default']
